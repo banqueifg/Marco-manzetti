@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>IFG (International Finance Groupe) — Compte</title>
+<style>
+  :root{
+    --bg1:#e6f2ff;
+    --bg2:#f7fbff;
+    --accent:#1d7ed1;
+    --accent-2:#0b8f6e;
+    --muted:#6b7280;
+  }
+  *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  body{margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .card{width:380px;background:white;border-radius:14px;box-shadow:0 10px 30px rgba(20,40,80,0.08);overflow:hidden;border:1px solid rgba(20,40,80,0.04)}
+  .header{padding:20px 22px;background:linear-gradient(90deg,#f0f8ff,#eef9f2);display:flex;gap:12px;align-items:center}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#0b7cd6,#0bb37c);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;box-shadow:0 4px 12px rgba(11,124,214,0.18)}
+  .bank{font-size:15px;font-weight:700;color:var(--accent);line-height:1}
+  .bank small{display:block;font-weight:600;color:#064d86}
+  .email{font-size:12px;color:var(--muted);margin-top:6px}
+  .balance-row{padding:18px 22px;border-bottom:1px dashed rgba(20,40,80,0.06);display:flex;align-items:center;justify-content:space-between}
+  .balance-label{font-size:13px;color:var(--muted)}
+  .balance{font-size:26px;font-weight:800;color:#042b57}
+  .content{padding:18px 22px}
+  label{display:block;font-weight:700;margin-bottom:8px;color:#0b3d61}
+  .note{font-weight:600;color:var(--muted);font-size:13px;margin-bottom:12px}
+  select,input,textarea{width:100%;padding:12px 14px;border:1px solid rgba(10,20,40,0.06);border-radius:10px;font-size:14px;outline:none}
+  select:focus,input:focus,textarea:focus{box-shadow:0 6px 18px rgba(11,124,214,0.08);border-color:rgba(11,124,214,0.18)}
+  .row{margin-bottom:12px}
+  .actions{display:flex;gap:12px;align-items:center;margin-top:12px}
+  .btn{flex:1;padding:12px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+  .btn-primary{background:linear-gradient(90deg,var(--accent),#0a6cb7);color:white;box-shadow:0 8px 20px rgba(13,83,175,0.12)}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid rgba(10,20,40,0.04)}
+  .history{background:#fbfdff;border-radius:10px;padding:12px;margin-top:14px;border:1px solid rgba(10,20,40,0.03)}
+  .history h4{margin:0 0 8px 0;font-size:13px;color:#0b3d61}
+  .tx{display:flex;justify-content:space-between;padding:10px;border-radius:8px;align-items:center;margin-bottom:8px;background:linear-gradient(180deg,rgba(10,20,40,0.01),transparent)}
+  .tx:last-child{margin-bottom:0}
+  .tx .left{font-size:13px}
+  .tx .right{font-weight:700}
+  .success{color:var(--accent-2);font-weight:800}
+  .danger{color:#d0383a;font-weight:800}
+  .small{font-size:12px;color:var(--muted)}
+  .accent-name{color:var(--accent);font-weight:800;text-decoration:underline 2px rgba(29,126,209,0.12);padding:2px 4px;border-radius:6px}
+  .under{text-decoration:underline dotted rgba(10,20,40,0.06)}
+  .pin-modal{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;padding:18px}
+  .modal-card{width:360px;background:white;padding:18px;border-radius:12px;box-shadow:0 20px 50px rgba(2,6,23,0.4);border:1px solid rgba(10,20,40,0.06)}
+  .pin-inputs{display:flex;gap:10px;justify-content:center;margin:14px 0}
+  .pin-inputs input{width:54px;height:54px;font-size:22px;text-align:center;border-radius:10px;border:1px solid rgba(10,20,40,0.08)}
+  .status{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .icon-ok{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#e6fcef;color:var(--accent-2);font-weight:800}
+  .icon-no{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#ffeceb;color:#d0383a;font-weight:800}
+  footer{padding:10px 22px;background:linear-gradient(90deg,#f6fbff,#f9fff6);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+  .brand{font-weight:800;color:#064d86}
+  @media(max-width:420px){.card{width:100%}}
+
+  .pending { border-left: 4px solid #d0383a; }
+  .pending .small { color: #d0383a; font-weight:700; }
+</style>
+</head>
+<body>
+  <div class="card" id="app">
+    <div class="header">
+      <div class="logo">IFG</div>
+      <div style="flex:1">
+        <div class="bank">IFG (International Finance Groupe)<br/><small>Conto personale</small></div>
+        <div class="email small"></div>
+      </div>
+      <div style="text-align:right">
+        <div class="small">Solde</div>
+        <div class="balance" id="balance">850 €</div>
+      </div>
+    </div>
+
+    <div class="balance-row">
+      <div>
+        <div class="balance-label">Titolare del conto</div>
+        <div class="accent-name"><span class="accent-name" style="font-size:20px;">MARCO MANZETTI</span></div>
+        <div class="small under">Numero di conto e PIN richiesti per il trasferimento</div>
+      </div>
+      
+    </div>
+
+    <div class="content">
+      
+
+      <div class="row">
+        <label>Metodo di trasferimento</label>
+        <select id="mode">
+          <option>IBAN</option>
+          <option>RIB</option>
+          <option>PayPal</option>
+          <option>Cash App</option>
+          <option>N26</option>
+          <option>Revolut</option>
+          <option>BNP</option>
+          <option>Im Revolut</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>Numero di conto / Identificativo destinatario <span style="color:#d0383a">*</span></label>
+        <input id="account" placeholder="Ex: FR76 1234 5678 9012 3456 7890" />
+      </div>
+
+      <div class="row">
+        <label>Importo (€)</label>
+        <input id="amount" type="number" min="1" placeholder="100" />
+      </div>
+
+      <div class="row">
+        <label>Nota (opzionale)</label>
+        <input id="note" placeholder="Ex: Paiement facture" />
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="transferBtn">Trasferire</button>
+        <button class="btn btn-ghost" id="availBtn">Saldo disponibile</button>
+      </div>
+
+      <div class="history" id="historyWrap">
+        <h4>Storico dei trasferimenti</h4>
+        <div id="history">
+          <!-- transactions will appear here -->
+        </div>
+        <div class="small" style="margin-top:8px;color:#475569">I trasferimenti sono simulati localmente. Gli importi si adeguano al saldo visualizzato.</div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="brand">IFG (International Finance Groupe)</div>
+      <div class="small">Fiducia - Sicurezza - Credibilità</div>
+    </footer>
+  </div>
+
+  <!-- PIN Modal (hidden by default) -->
+  <div id="pinModal" class="pin-modal" style="display:none">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800;color:#053a6b">Conferma del trasferimento</div>
+          <div class="small">Inserisci il codice PIN a 4 cifre per confermare</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">Compte: <span style="font-weight:800;color:var(--accent)"><span class="accent-name" style="font-size:20px;">MARCO MANZETTI</span></span></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="small">Importo</div>
+        <div id="modalAmount" style="font-weight:800;font-size:18px;margin-top:6px"></div>
+        <div class="small" style="margin-top:6px">Destinatario: <span id="modalAccount" style="font-weight:700"></span></div>
+        <div class="small" style="margin-top:6px">Mode: <span id="modalMode" style="font-weight:700"></span></div>
+      </div>
+
+      <div style="margin-top:10px"> 
+        <div class="small">Codice PIN</div>
+        <div class="pin-inputs">
+          <input maxlength="1" class="pin-digit" />
+          <input maxlength="1" class="pin-digit" />
+          <input maxlength="1" class="pin-digit" />
+          <input maxlength="1" class="pin-digit" />
+        </div>
+
+        <div class="status" id="pinStatus" style="display:none">
+          <div id="pinIcon"></div>
+          <div id="pinMsg" style="font-weight:700"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary" id="confirmPin">Confermare</button>
+          <button class="btn btn-ghost" id="cancelPin">Annullare</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+(function(){
+  const BALANCE_EL = document.getElementById('balance');
+  let balance = 850.00;
+  const historyEl = document.getElementById('history');
+  const TRANSFER_PIN = '5514'; // secret fixed code as requested (do not change)
+  const transferBtn = document.getElementById('transferBtn');
+  const pinModal = document.getElementById('pinModal');
+  const modalAmount = document.getElementById('modalAmount');
+  const modalAccount = document.getElementById('modalAccount');
+  const modalMode = document.getElementById('modalMode');
+  const pinStatus = document.getElementById('pinStatus');
+  const pinIcon = document.getElementById('pinIcon');
+  const pinMsg = document.getElementById('pinMsg');
+
+  function formatMoney(v){ return v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €'; }
+  function renderBalance(){
+    BALANCE_EL.textContent = formatMoney(balance);
+  }
+  function addHistory(entry){
+    const div = document.createElement('div');
+    // If note contains 'En attente', mark the entry as pending (red)
+    const isPending = (entry.note && entry.note.indexOf('En attente') !== -1);
+    div.className = 'tx' + (isPending ? ' pending' : '');
+    // Highlight the 'En attente' text in red for clarity
+    const noteText = entry.note ? (isPending ? entry.note.replace('En attente', '<span style="color:#d0383a;font-weight:800;">En attente</span>') : entry.note) : '';
+    div.innerHTML = '<div class="left"><div style="font-weight:700>'+entry.mode+' → <span style="color:#0b6fb6">'+entry.to+'</span></div><div class="small">'+noteText+' • '+entry.when+'</div></div><div class="right">'+entry.amount+'</div>';
+    historyEl.insertBefore(div, historyEl.firstChild);
+}
+
+// Prepopulate history with one sample
+  transferBtn.addEventListener('click', ()=> {
+    const mode = document.getElementById('mode').value;
+    const account = document.getElementById('account').value.trim();
+    const amountRaw = document.getElementById('amount').value;
+    const amount = parseFloat(amountRaw);
+    const note = document.getElementById('note').value || '—';
+
+    // validation: require account and valid amount
+    if(!account){
+      alert('Veuillez saisir un numéro de compte / identifiant destinataire avant de transférer.');
+      document.getElementById('account').focus();
+      return;
+    }
+    if(!amountRaw || isNaN(amount) || amount <= 0){
+      alert('Veuillez saisir un montant valide supérieur à 0.');
+      document.getElementById('amount').focus();
+      return;
+    }
+    if(amount > balance){
+      if(!confirm('Le montant dépasse le solde disponible. Voulez-vous continuer ?')) return;
+    }
+
+    // populate modal and show
+    modalAmount.textContent = formatMoney(amount);
+    modalAccount.textContent = account;
+    modalMode.textContent = mode;
+    pinStatus.style.display = 'none';
+    pinIcon.innerHTML = '';
+    pinMsg.innerHTML = '';
+    pinModal.style.display = 'flex';
+
+    // clear pin inputs
+    const pinInputs = Array.from(document.querySelectorAll('.pin-digit'));
+    pinInputs.forEach(i=>{i.value='';});
+    pinInputs[0].focus();
+
+    // store current transfer in dataset for confirmation
+    pinModal.dataset.transfer = JSON.stringify({mode,account,amount,note,when:new Date().toLocaleString()});
+  });
+
+  // PIN inputs auto-advance
+  document.addEventListener('input', (e)=>{
+    if(e.target.classList.contains('pin-digit')){
+      const next = e.target.nextElementSibling;
+      if(next && e.target.value) next.focus();
+    }
+  });
+
+  document.getElementById('cancelPin').addEventListener('click', ()=>{
+    pinModal.style.display='none';
+  });
+
+  document.getElementById('confirmPin').addEventListener('click', ()=>{
+    const pinInputs = Array.from(document.querySelectorAll('.pin-digit'));
+    const code = pinInputs.map(i=>i.value).join('');
+    // show status
+    pinStatus.style.display = 'flex';
+    if(code === TRANSFER_PIN){
+      pinIcon.innerHTML = '<div class="icon-ok">✓</div>';
+      pinMsg.textContent = 'Code valide — Transfert effectué';
+      pinMsg.style.color = 'var(--accent-2)';
+      // perform transfer
+      const data = JSON.parse(pinModal.dataset.transfer || '{}');
+      // Ne pas débiter le solde : transfert en attente (non crédité/débité).
+      addHistory({mode:data.mode, to:data.account, amount:formatMoney(data.amount), note:data.note + ' • En attente', when:data.when});
+      setTimeout(()=>{ 
+        pinModal.style.display='none'; 
+        alert("Merci d’avoir effectué le transfert de " + formatMoney(data.amount) + " vers le numéro de compte " + data.account + ".\nVeuillez patienter 72 heures avant que les fonds soient disponibles sur votre compte.");
+      }, 1000);
+    } else {
+      pinIcon.innerHTML = '<div class="icon-no">✕</div>';
+      pinMsg.textContent = 'Code invalide — Réessayez';
+      pinMsg.style.color = '#d0383a';
+      // shake inputs for effect
+      pinInputs.forEach(i=>{
+        i.style.borderColor = '#d0383a';
+      });
+      setTimeout(()=>{ pinStatus.style.display = 'none'; pinIcon.innerHTML=''; pinMsg.innerHTML=''; pinInputs.forEach(i=>i.style.borderColor=''); }, 1600);
+    }
+  });
+
+  // also allow pressing Enter in last pin to confirm
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && pinModal.style.display === 'flex'){
+      e.preventDefault();
+      document.getElementById('confirmPin').click();
+    }
+    if(e.key === 'Escape' && pinModal.style.display === 'flex'){
+      document.getElementById('cancelPin').click();
+    }
+  });
+
+  // initial render
+  renderBalance();
+
+})();
+</script>
+</body>
+</html>
